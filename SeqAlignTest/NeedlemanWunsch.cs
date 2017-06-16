@@ -7,11 +7,12 @@ namespace SeqAlignTest
     {
         private string firstSequence { get; set; }
         private string secondSequence { get; set; }
+        public int[] initialSize { get; set; }
 
         public int firstSequenceCounter { get; set; }
         public int secondSequenceCounter { get; set; }
         public double percScore { get; set; }
-        public int[,] scoringMatrix { get; set; }
+        public int[,] scoreMatrix { get; set; }
         public string alignmentFirstSequence { get; set; }
         public string alignmentSecondSequence { get; set; }
 
@@ -21,12 +22,14 @@ namespace SeqAlignTest
         {
             firstSequence = Util.ReadFasta(firstSequenceFile);
             secondSequence = Util.ReadFasta(secondSequenceFile);
+
+            initialSize = new int[2] { firstSequence.Count(), secondSequence.Count() };
             
             firstSequenceCounter = firstSequence.Length + 1;
             secondSequenceCounter = secondSequence.Length + 1;
             percScore = 0.0;
 
-            scoringMatrix = new int[secondSequenceCounter, firstSequenceCounter];
+            scoreMatrix = new int[secondSequenceCounter, firstSequenceCounter];
             
             alignmentFirstSequence = string.Empty;
             alignmentSecondSequence = string.Empty;
@@ -37,7 +40,7 @@ namespace SeqAlignTest
             for (int i = 0; i < secondSequenceCounter; i++)
             {
                 for (int j = 0; j < firstSequenceCounter; j++)
-                    scoringMatrix[i, j] = 0;
+                    scoreMatrix[i, j] = 0;
             }
         }
 
@@ -50,16 +53,16 @@ namespace SeqAlignTest
                 {
                     int scroeDiag = 0;
                     if (firstSequence.Substring(j - 1, 1) == secondSequence.Substring(i - 1, 1))
-                        scroeDiag = scoringMatrix[i - 1, j - 1] + 2;                    // +2 para Match
+                        scroeDiag = scoreMatrix[i - 1, j - 1] + 2;                    // +2 para Match
                     else
-                        scroeDiag = scoringMatrix[i - 1, j - 1] + -1;                   // -1 pra Missmatch
+                        scroeDiag = scoreMatrix[i - 1, j - 1] + -1;                   // -1 pra Missmatch
 
-                    int scroeLeft = scoringMatrix[i, j - 1] - 2;                        // -2 pra Gap
-                    int scroeUp = scoringMatrix[i - 1, j] - 2;
+                    int scroeLeft = scoreMatrix[i, j - 1] - 2;                        // -2 pra Gap
+                    int scroeUp = scoreMatrix[i - 1, j] - 2;
 
                     int maxScore = Math.Max(Math.Max(scroeDiag, scroeLeft), scroeUp);
 
-                    scoringMatrix[i, j] = maxScore;
+                    scoreMatrix[i, j] = maxScore;
                 }
             }
             executionTime = (DateTime.Now - initialTime).TotalSeconds;
@@ -69,11 +72,12 @@ namespace SeqAlignTest
         {
             for (int i = 0; i < secondSequenceCounter; i++)
             {
+                Console.Write("  ");
                 for (int j = 0; j < firstSequenceCounter; j++)
                 {
-                    if (scoringMatrix[i, j] >= 0)
+                    if (scoreMatrix[i, j] >= 0)
                         Console.Write(" ");
-                    Console.Write(scoringMatrix[i, j]);
+                    Console.Write(" " + scoreMatrix[i, j]);
                 }
                 Console.Write(Environment.NewLine);
             }
@@ -110,7 +114,7 @@ namespace SeqAlignTest
                     else
                         scroeDiag = -1;
 
-                    if (m > 0 && n > 0 && scoringMatrix[m, n] == scoringMatrix[m - 1, n - 1] + scroeDiag)
+                    if (m > 0 && n > 0 && scoreMatrix[m, n] == scoreMatrix[m - 1, n - 1] + scroeDiag)
                     {
                         percScore += 1;
                         alignmentFirstSequence = secondSequenceTracebackArray[n - 1] + alignmentFirstSequence;
@@ -118,7 +122,7 @@ namespace SeqAlignTest
                         m = m - 1;
                         n = n - 1;
                     }
-                    else if (n > 0 && scoringMatrix[m, n] == scoringMatrix[m, n - 1] - 2)
+                    else if (n > 0 && scoreMatrix[m, n] == scoreMatrix[m, n - 1] - 2)
                     {
                         alignmentFirstSequence = secondSequenceTracebackArray[n - 1] + alignmentFirstSequence;
                         alignmentSecondSequence = "-" + alignmentSecondSequence;
@@ -132,20 +136,30 @@ namespace SeqAlignTest
                     }
                 }
             }
-            executionTime = (DateTime.Now - initialTime).TotalSeconds;
+            executionTime = (DateTime.Now - initialTime).TotalSeconds + executionTime;
         }
 
         public void PrintResult()
         {
-            Console.WriteLine("------------------------------------------------------------------------------------------");
-            Console.WriteLine($"Tempo de execucao:\n { executionTime } segundos");
-            Console.WriteLine("------------------------------------------------------------------------------------------");
-            Console.WriteLine($"Tamanho da sequencia apos alinhamento:\n { alignmentFirstSequence.Count() }");
-            Console.WriteLine("------------------------------------------------------------------------------------------");
-            Console.WriteLine($"Semelhanca entre as sequencias (% erros e acertos):\n{ percScore * 100.0 / alignmentFirstSequence.Count() } %");
-            Console.WriteLine("------------------------------------------------------------------------------------------");
-            Console.WriteLine($"Score:\n { scoringMatrix[secondSequenceCounter - 1, firstSequenceCounter - 1] }");
-            Console.ReadLine();
+            Console.WriteLine("----------------------------------------------------");
+            Console.WriteLine("Needleman Wusch");
+            Console.WriteLine("----------------------------------------------------");
+            Console.WriteLine("Tempo de execucao:");
+            Console.WriteLine($"{ executionTime } segundos");
+            Console.WriteLine("----------------------------------------------------");
+            Console.WriteLine("Tamanho da sequencia antes do alinhamento:");
+            Console.WriteLine($"1a Sequencia - { initialSize[0] }   |   2a Sequencia - { initialSize[1] }");
+            Console.WriteLine("----------------------------------------------------");
+            Console.WriteLine("Tamanho da sequencia apos alinhamento:");
+            Console.WriteLine($"{ alignmentFirstSequence.Count() }");
+            Console.WriteLine("----------------------------------------------------");
+            Console.WriteLine($"Semelhanca entre as sequencias:");
+            Console.WriteLine($"{ percScore * 100.0 / (alignmentFirstSequence.Count() + 1) } %");
+            //Console.WriteLine($"{ percScore } - { (alignmentFirstSequence.Count() + 1) } %");
+            Console.WriteLine("----------------------------------------------------");
+            Console.WriteLine($"Score:");
+            Console.WriteLine($"{ scoreMatrix[secondSequenceCounter - 1, firstSequenceCounter - 1] }");
+            Console.WriteLine("----------------------------------------------------");
         }
 
     }
