@@ -2,7 +2,7 @@
 
 Trabalho apresentado à disciplina de Projeto e Análise de Algoritmos da Pontifícia Universidade Católica de Minas Gerais.
 
-Artigo elaborado pelos alunos:
+Projeto elaborado pelos alunos:
 - Andressa P. C. de Oliveira
 - Heitor D. Carvalho
 - Matheus Mayron D. de Lima
