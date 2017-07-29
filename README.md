@@ -5,5 +5,5 @@ Trabalho apresentado à disciplina de Projeto e Análise de Algoritmos da Pontif
 Projeto elaborado pelos alunos:
 - Andressa P. C. de Oliveira
 - Heitor D. Carvalho
-- Matheus Mayron D. de Lima
+- Matheus M. D. de Lima
 - Raphael F. Pereira
